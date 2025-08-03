@@ -1,0 +1,50 @@
+root_tgt_video_folder: data/results
+cotracker_model_path: /path/to/code/co-tracker/checkpoints/scaled_offline.pth
+IQA_PyTorch_model_path: /path/to/code/IQA-PyTorch
+# num frames are fed into VLM for five_acc calculation
+five_acc_vlm_num_frames: 4
+five_acc_vlm_model_id: Qwen/Qwen2.5-VL-7B-Instruct
+
+# evaluation settings
+device: cuda
+src_image_folder: data/
+frame_stride: 8
+annotation_mapping_files:
+  - data/edit_prompt/edit1_FiVE.json
+  - data/edit_prompt/edit2_FiVE.json
+  - data/edit_prompt/edit3_FiVE.json
+  - data/edit_prompt/edit4_FiVE.json
+  - data/edit_prompt/edit5_FiVE.json
+  - data/edit_prompt/edit6_FiVE.json
+metrics:
+  - structure_distance
+  - psnr_unedit_part
+  - lpips_unedit_part
+  - mse_unedit_part
+  - ssim_unedit_part
+  - clip_similarity_source_image
+  - clip_similarity_target_image
+  - clip_similarity_target_image_edit_part
+  - niqe_source_image
+  - niqe_target_image
+  - motion_fidelity_score
+  - motion_fidelity_score_edit_part
+  - five_acc
+tgt_methods:
+  - 1_TokenFlow
+  - 2_DMT
+  - 4-VidToMe
+  - 5-AnyV2V
+  - 6-VideoGrain
+  - 7-Pyramid-Edit
+  - 8-Wan-Edit
+result_path: outputs/evaluation_result.csv
+edit_category_list:
+  - "1"
+  - "2"
+  - "3"
+  - "4"
+  - "5"
+  - "6"
+evaluate_whole_table: true
+evaluate_source_video: true
