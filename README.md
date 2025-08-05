@@ -112,9 +112,7 @@ Use your video editing method to edit the FiVE-Bench videos based on the provide
 
 <img src="assets/pyramid_edit_wan_edit.png" alt="rf-editing" width="700"/>
 
-Example implementations of our proposed rectified flow (RF)-based video editing methods are provided below:
-
--  Example implementations of rectified flow (RF)-based video editing methods are provided in the [`models/`](models/) directory:
+Example implementations of our proposed rectified flow (RF)-based video editing methods are provided provided in the [`models/`](models/) directory:
   
     - **[Pyramid-Edit](models/README.md#pyramid-edit)**: Diffusion-based video editing using Pyramid-Flow architecture
 
