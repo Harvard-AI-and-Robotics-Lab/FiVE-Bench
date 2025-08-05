@@ -1,6 +1,5 @@
 # FiVE-Bench Video Editing Models
 
-<img src="../assets/pyramid_edit_wan_edit.png" alt="rf-editing" width="700"/>
 
 This directory contains two state-of-the-art video editing model implementations designed for the FiVE-Bench evaluation framework:
 
@@ -8,6 +7,8 @@ This directory contains two state-of-the-art video editing model implementations
 - **Wan-Edit**: A rectified flow-based video editing approach leveraging the Wan2.1-T2V model
 
 Both models support fine-grained video editing tasks including object transformations, style changes, background modifications, and temporal consistency preservation across 41-frame sequences.
+
+<img src="../assets/pyramid_edit_wan_edit.png" alt="rf-editing" width="700"/>
 
 ## Environment Setup
 
