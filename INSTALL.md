@@ -15,10 +15,9 @@
 ## Step 1: Create Conda Environment
 
 ```bash
-conda create -n five-bench python=3.11.10 -y
+conda create -n five-bench python=3.11 -y
 conda activate five-bench
 conda install pytorch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 pytorch-cuda=12.1 -c pytorch -c nvidia
-pip install transformers==4.45.2
 ```
 
 ---
@@ -36,57 +35,6 @@ pip install transformers==4.45.2
 Make sure all dependencies for each subproject are installed accordingly.
 
 > ⚠️ **NOTE:** Replace `/path/to/code` in the [`./config.yaml`](./config.yaml) file with the actual path to your ***code*** directory.
-
-
-
-### ⬇️ Clone FiVE-Bench Repository
-Download dataset and install the evaluation code
-
-```bash
-cd ./code
-# evaluation code
-git clone https://github.com/minghanli/FiVE-Bench.git
-
-# FiVE-Bench dataset 
-cd ./FiVE-Bench
-git clone https://huggingface.co/datasets/LIMinghan/FiVE-Fine-Grained-Video-Editing-Benchmark
-mv FiVE-Fine-Grained-Video-Editing-Benchmark data
-unzip bmasks.zip images.zip videos.zip
-```
-
-The data structure should looks like:
-
-  ```
-  📁 data
-  ├── 📁 assets/
-  ├── 📁 edit_prompt/
-  │   ├── 📄 edit1_FiVE.json
-  │   ├── 📄 edit2_FiVE.json
-  │   ├── 📄 edit3_FiVE.json
-  │   ├── 📄 edit4_FiVE.json
-  │   ├── 📄 edit5_FiVE.json
-  │   └── 📄 edit6_FiVE.json
-  ├── 📄 README.md
-  ├── 📦 bmasks.zip 
-  ├── 📁 bmasks 
-  │   ├── 📁 0001_bus
-  │       ├── 🖼️ 00001.jpg
-  │       ├── 🖼️ 00002.jpg
-  │       ├── 🖼️ ...
-  │   ├── 📁 ...
-  ├── 📦 images.zip 
-  ├── 📁 images
-  │   ├── 📁 0001_bus
-  │       ├── 🖼️ 00001.jpg
-  │       ├── 🖼️ 00002.jpg
-  │       ├── 🖼️ ...
-  │   ├── 📁 ...
-  ├── 📦 videos.zip 
-  ├── 📁 videos
-  │   ├── 🎞️ 0001_bus.mp4
-  │   ├── 🎞️ 0002_girl-dog.mp4
-  │   ├── 🎞️ ...
-  ```
 
 ### ⬇️ Install Co-Tracker and IQA Repos
 - Motion Fidelity Score (MFS) @ Co-Tracker: To evaluate temporal consistency using MFS, install [Co-Tracker](https://github.com/facebookresearch/co-tracker) in the following path: `./code/co-tracker`.
@@ -130,7 +78,55 @@ Then, replace the default `inference_iqa.py` with the version provided in our re
     cp ../../files/inference_iqa.py ./inference_iqa.py
     ```
 
+### ⬇️ Clone FiVE-Bench Repository
+Download dataset and install the evaluation code
 
+```bash
+cd ./code
+# evaluation code
+git clone https://github.com/minghanli/FiVE-Bench.git
+pip install -r requirements.txt
+
+# FiVE-Bench dataset 
+cd ./FiVE-Bench
+git clone https://huggingface.co/datasets/LIMinghan/FiVE-Fine-Grained-Video-Editing-Benchmark
+mv FiVE-Fine-Grained-Video-Editing-Benchmark data
+unzip bmasks.zip images.zip videos.zip
+```
+
+The data structure should looks like:
+
+  ```json
+  📁 data
+  ├── 📁 assets/
+  ├── 📁 edit_prompt/
+  │   ├── 📄 edit1_FiVE.json
+  │   ├── 📄 edit2_FiVE.json
+  │   ├── 📄 edit3_FiVE.json
+  │   ├── 📄 edit4_FiVE.json
+  │   ├── 📄 edit5_FiVE.json
+  │   └── 📄 edit6_FiVE.json
+  ├── 📄 README.md
+  ├── 📦 bmasks.zip 
+  ├── 📁 bmasks 
+  │   ├── 📁 0001_bus
+  │       ├── 🖼️ 00001.jpg
+  │       ├── 🖼️ 00002.jpg
+  │       ├── 🖼️ ...
+  │   ├── 📁 ...
+  ├── 📦 images.zip 
+  ├── 📁 images
+  │   ├── 📁 0001_bus
+  │       ├── 🖼️ 00001.jpg
+  │       ├── 🖼️ 00002.jpg
+  │       ├── 🖼️ ...
+  │   ├── 📁 ...
+  ├── 📦 videos.zip 
+  ├── 📁 videos
+  │   ├── 🎞️ 0001_bus.mp4
+  │   ├── 🎞️ 0002_girl-dog.mp4
+  │   ├── 🎞️ ...
+  ```
 
 ---
 

@@ -1,0 +1,27 @@
+device: 'cuda'
+dtype: 'bf16'
+seed: null
+model_name: 'pyramid_flux'
+model_path: 'models/pyramid-edit/hf/pyramid-flow-miniflux'
+resolution: '384p'
+dataset_json: 'data/edit_prompt/edit5_FiVE.json'
+
+# FiVE-Bench
+output_path: 'outputs/video_name'
+attn_path: 'outputs/video_name/attn_weights'
+data_dir: 'data/images'
+latents_path: 'data/video_name/rf_inv_latents'
+source_prompt: source prompt
+source_obj_prompt: source obj prompt
+target_prompt: target prompt
+target_obj_prompt: target obj prompt
+negative_prompt: worst quality, low quality, blurry, absolute black, absolute white, low res, extra limbs, extra digits, misplaced objects, mutated anatomy, monochrome, horror
+guidance_scale: 7.0
+video_guidance_scale: 5.0
+
+max_frames: 41  # (40 // 8 + 1) = 6
+n_timesteps: 20
+guidance_start_timestep_first: 750
+guidance_stop_timestep_first: 100
+guidance_start_timestep: 750
+guidance_stop_timestep: 100

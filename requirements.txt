@@ -1,0 +1,8 @@
+transformers
+flash-attn==2.7.4.post1
+Pillow
+omegaconf
+imageio
+einops
+torchmetrics
+qwen_vl_utils

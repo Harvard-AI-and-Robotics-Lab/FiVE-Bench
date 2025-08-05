@@ -36,3 +36,59 @@ MANIFEST
 # data
 data/
 outputs/
+
+# checkpoints
+models/wan-edit/hf/
+models/pyramid-edit/hf/
+
+# Model weights and large files
+*.pth
+*.pt
+*.ckpt
+*.bin
+*.safetensors
+
+# Video files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.*.swp
+.*.swo
+
+# Logs
+*.log
+logs/
+*.out
+
+# Environment and virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE files
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+Thumbs.db
+*.lnk
+
+# Cache directories
+.cache/
+__pycache__/
+.pytest_cache/

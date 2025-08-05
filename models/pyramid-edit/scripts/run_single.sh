@@ -1,0 +1,13 @@
+CUDA_VISIBLE_DEVICES=6 python models/pyramid-edit/edit.py \
+    --data_dir data/examples \
+    --video_name bear \
+    --source_prompt "A large brown bear is walking slowly across a rocky terrain in a zoo enclosure, surrounded by stone walls and scattered greenery. The camera remains fixed, capturing the bear's deliberate movements." \
+    --target_prompt "A purple bear is walking slowly across a rocky terrain in a zoo enclosure, surrounded by stone walls and scattered greenery. The camera remains fixed, capturing the bear's deliberate movements." \
+    --negative_prompt "worst quality, low quality, blurry, absolute black, absolute white, low res, extra limbs, extra digits, misplaced objects, mutated anatomy, monochrome, horror" \
+    --guidance_start_timestep_first 750 \
+    --guidance_stop_timestep_first 100 \
+    --guidance_start_timestep 750 \
+    --guidance_stop_timestep 100 \
+    --guidance_scale 7 \
+    --video_guidance_scale 5 \
+    --output_path outputs/pyramid_edit_results/examples

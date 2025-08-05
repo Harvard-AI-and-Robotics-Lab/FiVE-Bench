@@ -1,6 +1,6 @@
 root_tgt_video_folder: data/results
-cotracker_model_path: /path/to/code/co-tracker/checkpoints/scaled_offline.pth
-IQA_PyTorch_model_path: /path/to/code/IQA-PyTorch
+cotracker_model_path: /PHShome/ml1833/code/co-tracker/checkpoints/scaled_offline.pth
+IQA_PyTorch_model_path: /PHShome/ml1833/code/IQA-PyTorch
 # num frames are fed into VLM for five_acc calculation
 five_acc_vlm_num_frames: 4
 five_acc_vlm_model_id: Qwen/Qwen2.5-VL-7B-Instruct

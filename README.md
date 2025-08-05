@@ -22,8 +22,8 @@
 ## 📝 TODO List
 - [🔜] Add leaderboard support  
 - [🔜] Add `Wan-Edit` demo page on HF
-- [🔜] Release `Wan-Edit` implementation  
-- [🔜] Release `Pyramid-Edit` implementation  
+- [✅ Aug-05-2025] Release [`Wan-Edit'](models/wan-edit/) implementation  
+- [✅ Aug-05-2025] Release [`Pyramid-Edit`](models/pyramid-edit/) implementation  
 - [✅ Aug-02-2025] Add Wan-Edit results to HF for eval demo
 - [✅ Aug-02-2025] Evaluation code released 
 - [✅ Mar-31-2025] Dataset uploaded to Hugging Face   
@@ -72,7 +72,7 @@ The FiVE-Bench dataset offers a rich, structured benchmark for fine-grained vide
 
 - Place the downloaded dataset in the directory: `./FiVE_Bench/data`. The data structure should looks like:
 
-  ```
+  ```json
   📁 /path/to/code/FiVE_Bench/data
   ├── 📁 assets/
   ├── 📁 edit_prompt/
@@ -112,8 +112,35 @@ Use your video editing method to edit the FiVE-Bench videos based on the provide
 
 Example implementations of our proposed rectified flow (RF)-based video editing methods are provided below:
 
-- [7-Pyramid-Edit (coming soon)]()
-- [8-Wan-Edit (coming soon)]()
+-  Example implementations of rectified flow (RF)-based video editing methods are provided in the [`models/`](models/) directory:
+  
+    - **[Pyramid-Edit](models/README.md#pyramid-edit)**: Diffusion-based video editing using Pyramid-Flow architecture
+
+    - **[Wan-Edit](models/README.md#wan-edit)**: Rectified flow-based video editing with Wan2.1-T2V-1.3B model
+           
+  
+#### Quick Start with Provided Models
+  
+  **Run Pyramid-Edit:**
+  ```bash
+  # Setup model
+  cd models/pyramid-edit && mkdir -p hf/pyramid-flow-miniflux
+  # Download model checkpoint to hf/ directory
+  bash scripts/run_FiVE.sh
+  ```
+ 
+**Run Wan-Edit:**
+```bash
+# Setup model  
+cd models/wan-edit && mkdir -p hf/Wan2.1-T2V-1.3B
+# Download model checkpoint to hf/ directory
+bash scripts/run_FiVE.sh
+```
+
+For detailed setup instructions and configuration options, see the [Models 
+Documentation](models/README.md).
+
+
 
 
 ---
