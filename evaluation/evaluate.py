@@ -5,10 +5,18 @@ import os
 import numpy as np
 import glob
 import csv
+import cv2
+import torch
+import subprocess
 from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
 from omegaconf import OmegaConf
+
+
+from torchvision.io import read_video
+from decord import VideoReader, cpu
+import imageio
 
 from metrics_calculator import MetricsCalculator, average_niqe_from_txt
 
@@ -138,6 +146,20 @@ def list_images(directory):
     
     return sorted(image_files)
 
+def mp4_to_frames_ffmpeg(video_path):
+    output_dir = video_path.replace(".mp4", "")
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Use ffmpeg to extract frames
+    output_pattern = os.path.join(output_dir, "%05d.jpg")  # Frame naming pattern
+    command = [
+        "ffmpeg",
+        "-i", video_path,  # Input video file
+        output_pattern  # Output frame pattern
+    ]
+
+    subprocess.run(command, check=True)
+    return output_dir
 
 def calculate_mean(evaluation_result):
     if evaluation_result is None:
@@ -184,6 +206,7 @@ def main(args, config, all_tgt_video_folders):
 
     metrics_calculator = MetricsCalculator(args.device, config=config)
     
+    result_avg_files = []
     for annotation_mapping_file in tqdm(annotation_mapping_files, desc="Evaluating annotation mapping files", total=len(annotation_mapping_files)):
         print(f"evaluating {annotation_mapping_file} ...")
 
@@ -219,7 +242,7 @@ def main(args, config, all_tgt_video_folders):
                 continue
 
             video_name = item["video_name"]
-            save_dir = item["save_dir"]
+            save_dir = str(item["editing_type_id"]) + "_" + item["target_prompt"][:len(item["save_dir"])-2]  # item["save_dir"]
             source_prompt = item["source_prompt"].replace("[", "").replace("]", "")
             target_prompt = item["target_prompt"].replace("[", "").replace("]", "")
             # FiVE_acc
@@ -283,25 +306,28 @@ def main(args, config, all_tgt_video_folders):
                     tgt_video_path = src_video_path
                 print(f"\n\nevaluating method: {tgt_video_folder_key}")
                 
-                if not os.path.exists(tgt_video_path) or len(os.listdir(tgt_video_path)) == 0:
-                    tgt_image_names = []
-                    tgt_images = []
-                else:
-                    tgt_image_names = list_images(tgt_video_path)[::frame_stride]
-                    tgt_images = []
-                    
-                    for tgt_image_name in tgt_image_names:
-                        if tgt_image_name.endswith(".jpg") or tgt_image_name.endswith(".png"):
-                            tgt_image = Image.open(tgt_image_name).resize(src_images[0].size)
-                            tgt_images.append(tgt_image)
-                            save_resize_image = True
-                            if save_resize_image:
-                                output_path = os.path.join(
-                                    "/".join(tgt_image_name.split('/')[:-1])+"_resize", 
-                                    os.path.basename(tgt_image_name)
-                                )
-                                Path("/".join(tgt_image_name.split('/')[:-1])+"_resize").mkdir(parents=True, exist_ok=True)
-                                tgt_image.save(output_path)
+                if tgt_video_path.endswith("/"):
+                    tgt_video_path = tgt_video_path[:-1]
+                tgt_video_path_mp4 = tgt_video_path + '.mp4'
+                if os.path.exists(tgt_video_path_mp4):   
+                    # NOTE: must use ffmpeg!!
+                    tgt_video_path = mp4_to_frames_ffmpeg(tgt_video_path_mp4)
+
+                tgt_image_names = list_images(tgt_video_path)
+                tgt_image_names = tgt_image_names[::frame_stride]
+                tgt_images = []
+                for f_i, tgt_image_name in enumerate(tgt_image_names):
+                    if tgt_image_name.endswith(".jpg") or tgt_image_name.endswith(".png"):
+                        tgt_image = Image.open(tgt_image_name).resize(src_images[0].size)  
+                        tgt_images.append(tgt_image)
+
+                        tgt_image_name = os.path.join(
+                            "/".join(tgt_image_name.split('/')[:-1])+"_resize", 
+                            os.path.basename(tgt_image_name)
+                        )
+                        tgt_image_names[f_i] = tgt_image_name
+                        Path("/".join(tgt_image_name.split('/')[:-1])).mkdir(parents=True, exist_ok=True)
+                        tgt_image.save(tgt_image_name)
                 
                 for m_j, metric in enumerate(metrics):
                     if metric in {"niqe_source_image"} and m_i > 0:
@@ -309,15 +335,15 @@ def main(args, config, all_tgt_video_folders):
 
                     print(f"\nevaluating metric: {metric}")
                     if len(tgt_images) == 0:
-                        print(f"No iamges are founded {tgt_video_path}!")
+                        print(f"No images are founded {tgt_video_path}! Skip ...")
                         if metric in {"five_acc"}:
                             evaluation_result += ["nan"] * 5
                         else:
                             evaluation_result.append("nan")
                         continue
-
+                    
                     assert len(os.listdir(src_video_path)) > 0 and \
-                        len(os.listdir(tgt_video_path)) > 0, f"No iamges are founded!"
+                        len(tgt_images) > 0, f"No images are founded!"
 
                     try:
                         if metric in {"motion_fidelity_score", "motion_fidelity_score_edit_part", "five_acc"}:
@@ -360,7 +386,7 @@ def main(args, config, all_tgt_video_folders):
                                 evaluation_result.append(eval_result_)
 
                         else:
-
+                            
                             if metric in {"niqe_source_image", "niqe_target_image"}:
                                 if os.path.exists(src_save_file_niqe if metric == "niqe_source_image" else tgt_save_file_niqe):
                                     os.remove(src_save_file_niqe if metric == "niqe_source_image" else tgt_save_file_niqe)
@@ -403,7 +429,7 @@ def main(args, config, all_tgt_video_folders):
                                 )
 
                     except Exception as e:
-                        print(f"error {metric}: {e}")
+                        print(f"Error: {metric}: {e}")
                         continue
                       
             with open(result_path, 'a+', newline="") as f:
@@ -416,46 +442,96 @@ def main(args, config, all_tgt_video_folders):
             header, rows = reader[0], reader[1:]
 
         avg_row = []
-        columns = list(zip(*rows))
-        for name, col in zip(header, columns):
+        # Process each column by index to handle rows with different lengths
+        for col_idx, name in enumerate(header):
+            print("processing", name)
+            # Extract column values, handling missing values
+            col_values = []
+            for row in rows:
+                if col_idx < len(row):
+                    col_values.append(row[col_idx])
+                else:
+                    col_values.append("")  # Use empty string for missing values
+            
             try:
-                values = [float(x) for x in col]
-                avg = sum(values) / len(values)
-                if 'structure_distance' in name:
-                    avg *= 1000
-                elif 'lpips_' in name:
-                    avg *= 1000
-                elif 'mse_' in name:
-                    avg *= 10000
-                elif 'ssim_' in name:
-                    avg *= 100
-                elif 'motion_fidelity_score' in name:
-                    avg *= 100
-                elif name.startswith('five_acc'):
-                    avg *= 100
-                avg_row.append(f"{avg:.4f}")
+                # Filter out empty strings and convert to float
+                values = [float(x) for x in col_values if x != "" and x != "nan"]
+                if values:  # Only calculate average if there are valid values
+                    avg = sum(values) / len(values)
+                    if 'structure_distance' in name:
+                        avg *= 1000
+                    elif 'lpips_' in name:
+                        avg *= 1000
+                    elif 'mse_' in name:
+                        avg *= 10000
+                    elif 'ssim_' in name:
+                        avg *= 100
+                    elif 'motion_fidelity_score' in name:
+                        avg *= 100
+                    elif name.startswith('five_acc'):
+                        avg *= 100
+                    avg_row.append(f"{avg:.4f}")
+                else:
+                    avg_row.append("N/A")
             except ValueError:
                 avg_row.append("N/A")
 
-
-        with open(result_path.replace('.csv', '_avg.csv'), 'w', newline='') as f_out:
+        result_avg_files.append(result_path.replace('.csv', '_avg.csv'))
+        with open(result_avg_files[-1], 'w', newline='') as f_out:
             writer = csv.writer(f_out)
             writer.writerow(header)
             writer.writerow(avg_row)
-
-
     
+    # average the results in result_avg_files
+    if result_avg_files:
+        all_avg_rows = []
+        
+        # Read all average files
+        for result_avg_file in result_avg_files:
+            with open(result_avg_file, 'r') as f:
+                reader = list(csv.reader(f))
+                header, rows = reader[0], reader[1:]
+                if rows:  # Make sure there's data
+                    all_avg_rows.append(rows[0])  # Get the average row
+        
+        # Calculate final averages across all files
+        final_avg_row = []
+        for col_idx, name in enumerate(header):
+            print("final averaging", name)
+            
+            # Extract values from all average files for this column
+            col_values = []
+            for avg_row in all_avg_rows:
+                if col_idx < len(avg_row) and avg_row[col_idx] != "N/A":
+                    try:
+                        col_values.append(float(avg_row[col_idx]))
+                    except ValueError:
+                        pass  # Skip non-numeric values
+            
+            # Calculate final average
+            if col_values:
+                final_avg = sum(col_values) / len(col_values)
+                final_avg_row.append(f"{final_avg:.4f}")
+            else:
+                final_avg_row.append("N/A")
+        
+        # Write final averaged results
+        with open(f"{os.path.dirname(result_avg_files[0])}/final_averaged_results.csv", 'w', newline='') as f_out:
+            writer = csv.writer(f_out)
+            writer.writerow(header)
+            writer.writerow(final_avg_row)
+
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--frame_stride", type=int, default=8)
     parser.add_argument('--annotation_mapping_files', nargs = '+', type=str, default=[
-                                                        # "data/edit_prompt/edit1_FiVE.json",
-                                                        # "data/edit_prompt/edit2_FiVE.json",
-                                                        # "data/edit_prompt/edit3_FiVE.json",
-                                                        # "data/edit_prompt/edit4_FiVE.json",
+                                                        "data/edit_prompt/edit1_FiVE.json",
+                                                        "data/edit_prompt/edit2_FiVE.json",
+                                                        "data/edit_prompt/edit3_FiVE.json",
+                                                        "data/edit_prompt/edit4_FiVE.json",
                                                         "data/edit_prompt/edit5_FiVE.json",
-                                                        # "data/edit_prompt/edit6_FiVE.json",
+                                                        "data/edit_prompt/edit6_FiVE.json",
                                                         ])
     parser.add_argument('--metrics', nargs = '+', type=str, default=[
                                                          "structure_distance",

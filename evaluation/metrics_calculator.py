@@ -701,7 +701,7 @@ class MetricsCalculator:
         img_pred_tensor=torch.tensor(img_pred).permute(2,0,1).unsqueeze(0).to(self.device)
         img_gt_tensor=torch.tensor(img_gt).permute(2,0,1).unsqueeze(0).to(self.device)
             
-        score =  self.lpips_metric_calculator(img_pred_tensor*2-1,img_gt_tensor*2-1)
+        score =  self.lpips_metric_calculator(img_pred_tensor*2-1, img_gt_tensor*2-1)
         score = score.cpu().item()
         
         return score
