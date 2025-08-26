@@ -22,6 +22,7 @@
 ## 📝 TODO List
 - [🔜] Add leaderboard support  
 - [🔜] Add `Wan-Edit` demo page on HF
+- [✅ Aug-26-2025] Fix two issues: mp4_to_frames_ffmpeg and skip_timestep=17
 - [✅ Aug-05-2025] Release [`Wan-Edit'](models/wan-edit/) implementation  
 - [✅ Aug-05-2025] Release [`Pyramid-Edit`](models/pyramid-edit/) implementation  
 - [✅ Aug-02-2025] Add Wan-Edit results to HF for eval demo
