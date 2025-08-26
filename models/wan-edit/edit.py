@@ -204,6 +204,16 @@ def _parse_args():
         type=float,
         default=5.0,
         help="Classifier free guidance scale.")
+    parser.add_argument(
+        "--tgt_guide_scale",
+        type=float,
+        default=10.0,
+        help="Target guide scale for Wan-Edit.")
+    parser.add_argument(
+        "--skip_timesteps",
+        type=int,
+        default=16,
+        help="Skip timesteps for Wan-Edit.")
     
     # FiVE
     parser.add_argument(
@@ -243,7 +253,7 @@ def _init_logging(rank):
     else:
         logging.basicConfig(level=logging.ERROR)
 
-def load_frames(video_path=None, num_frames=41, target_size=(832,480)):
+def load_frames(video_path=None, num_frames=41, target_size=(832, 480)):
     # Open video file
     cap = cv2.VideoCapture(video_path)
     # Check if video is successfully opened
@@ -430,6 +440,8 @@ def generate(args):
             sample_solver=args.sample_solver,
             sampling_steps=args.sample_steps,
             guide_scale=args.sample_guide_scale,
+            tgt_guide_scale=args.tgt_guide_scale,
+            skip_timesteps=args.skip_timesteps,
             seed=args.base_seed,
             offload_model=args.offload_model)
         

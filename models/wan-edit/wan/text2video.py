@@ -265,7 +265,7 @@ class WanT2V:
 
         return videos[0] if self.rank == 0 else None
 
-    def edit(self,video,
+    def edit(self, video,
                  src_prompt,
                  tgt_prompt,
                  size=(1280, 720),
@@ -274,6 +274,8 @@ class WanT2V:
                  sample_solver='unipc',
                  sampling_steps=50,
                  guide_scale=5.0,
+                 tgt_guide_scale=10.0,
+                 skip_timesteps=15,
                  n_prompt="",
                  seed=-1,
                  offload_model=True):
@@ -295,6 +297,10 @@ class WanT2V:
                 Number of diffusion sampling steps. Higher values improve quality but slow generation
             guide_scale (`float`, *optional*, defaults 5.0):
                 Classifier-free guidance scale. Controls prompt adherence vs. creativity
+            tgt_guide_scale (`float`, *optional*, defaults to 10.0):
+                Target guide scale for Wan-Edit.
+            skip_timesteps (`int`, *optional*, defaults to 15):
+                Skip timesteps for Wan-Edit.
             n_prompt (`str`, *optional*, defaults to ""):
                 Negative prompt for content exclusion. If not given, use `config.sample_neg_prompt`
             seed (`int`, *optional*, defaults to -1):
@@ -378,7 +384,7 @@ class WanT2V:
             arg_src = {'context': context_src, 'seq_len': seq_len}
             arg_tgt = {'context': context_tgt, 'seq_len': seq_len}
             arg_null = {'context': context_null, 'seq_len': seq_len}
-            start_latents=latents #[]
+            start_latents = latents #[b, c, t, h, w]
             mv_latent = latents
             for i, t in enumerate(tqdm(timesteps)):
                 noise = [
@@ -393,8 +399,7 @@ class WanT2V:
                 latent_model_input = latents
                 timestep = [t]
                 timestep = torch.stack(timestep)
-                if i < 9:   # color
-                # if i < 12:
+                if i < skip_timesteps:
                     continue
                 t_prev = 1000 if i==0 else timesteps[i-1]
                 src_latent = [t_prev/1000.0*noise[0] + (1000-t_prev)/1000.0*start_latents[0]]
@@ -411,9 +416,9 @@ class WanT2V:
 
                 noise_pred_src = noise_pred_uncond_src + guide_scale * (
                     noise_pred_cond_src - noise_pred_uncond_src)
-                noise_pred_tgt = noise_pred_uncond_tgt + 12.0 * (
+                noise_pred_tgt = noise_pred_uncond_tgt + tgt_guide_scale * (
                     noise_pred_cond_tgt - noise_pred_uncond_tgt)
-                noise_pred = noise_pred_tgt-noise_pred_src
+                noise_pred = noise_pred_tgt - noise_pred_src
 
                 temp_x0 = sample_scheduler.step(
                     noise_pred.unsqueeze(0),
